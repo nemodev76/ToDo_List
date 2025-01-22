@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        .card-body {
+            padding: 30px;
+        }
+        .form-control {
+            border-radius: 20px;
+        }
+        .btn-primary {
+            border-radius: 20px;
+        }
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        .todo-item .fa-trash, .todo-item .fa-check, .todo-item .fa-edit, .todo-item .fa-undo {
+            cursor: pointer;
+        }
+        .todo-item .fa-trash {
+            color: #dc3545;
+        }
+        .todo-item .fa-check {
+            color: #28a745;
+        }
+        .todo-item .fa-edit {
+            color: #ffc107;
+        }
+        .todo-item .fa-undo {
+            color: #17a2b8;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2>To-Do List</h2>
+            </div>
+            <div class="card-body">
+                <form id="todo-form">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="Add a new task" aria-label="New task" aria-describedby="button-addon2">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit" id="button-addon2">Add</button>
+                        </div>
+                    </div>
+                </form>
+                <div class="row">
+                    <div id="todo-list" class="col-md-6 mb-3">
+                        <h4>To-Do Tasks</h4>
+                        <!-- To-Do items will be appended here -->
+                    </div>
+                    <div id="completed-list" class="col-md-6 mb-3">
+                        <h4>Completed Tasks</h4>
+                        <!-- Completed items will be appended here -->
+                    </div>
+                </div>
+                <button class="btn btn-danger mt-3" id="clear-completed">Clear Completed Tasks</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('todo-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = this.querySelector('input');
+            const task = input.value.trim();
+            if (task) {
+                const todoList = document.getElementById('todo-list');
+                const todoItem = document.createElement('div');
+                todoItem.className = 'todo-item';
+                const dateTime = new Date().toLocaleString();
+                todoItem.innerHTML = `
+                    <span>${task}</span>
+                    <span class="text-muted">${dateTime}</span>
+                    <div>
+                        <i class="fas fa-edit"></i>
+                        <i class="fas fa-check"></i>
+                        <i class="fas fa-trash"></i>
+                    </div>
+                `;
+                todoList.appendChild(todoItem);
+                input.value = '';
+                todoItem.querySelector('.fa-trash').addEventListener('click', function() {
+                    todoItem.parentNode.removeChild(todoItem);
+                });
+                todoItem.querySelector('.fa-check').addEventListener('click', function() {
+                    todoItem.classList.add('completed');
+                    todoItem.querySelector('.fa-check').style.display = 'none';
+                    const undoIcon = document.createElement('i');
+                    undoIcon.className = 'fas fa-undo';
+                    todoItem.querySelector('div').appendChild(undoIcon);
+                    document.getElementById('completed-list').appendChild(todoItem);
+                    undoIcon.addEventListener('click', function() {
+                        todoItem.classList.remove('completed');
+                        todoItem.querySelector('.fa-check').style.display = 'inline';
+                        undoIcon.parentNode.removeChild(undoIcon);
+                        document.getElementById('todo-list').appendChild(todoItem);
+                    });
+                });
+                todoItem.querySelector('.fa-edit').addEventListener('click', function() {
+                    const newTask = prompt('Edit your task:', task);
+                    if (newTask) {
+                        todoItem.querySelector('span').textContent = newTask;
+                    }
+                });
+            }
+        });
+
+        document.getElementById('clear-completed').addEventListener('click', function() {
+            const completedList = document.getElementById('completed-list');
+            while (completedList.children.length > 1) {
+                completedList.removeChild(completedList.lastChild);
+            }
+        });
+    </script>
+</body>
+</html>
