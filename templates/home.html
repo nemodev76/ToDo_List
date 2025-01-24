@@ -69,30 +69,55 @@
                 <h2>To-Do List</h2>
             </div>
             <div class="card-body">
-                <form id="todo-form">
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Add a new task" aria-label="New task" aria-describedby="button-addon2">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit" id="button-addon2">Add</button>
-                        </div>
-                    </div>
-                </form>
                 <div class="row">
                     <div id="todo-list" class="col-md-6 mb-3">
                         <h4>To-Do Tasks</h4>
+                        <form id="todo-form" action="{% url 'add_task' %}" method="POST">
+                            {% csrf_token %}
+                            <div class="input-group mb-3">
+                                <input type="text" name="task" class="form-control" placeholder="Add a new task" aria-label="New task" aria-describedby="button-addon2">
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" type="submit" id="button-addon2">Add</button>
+                                </div>
+                            </div>
+                        </form>
                         <!-- To-Do items will be appended here -->
-                    </div>
+                        {% for task in tasks %}
+                        <div class="todo-item">
+                            <span>{{task}}</span>
+                            <span class="text-muted">{{task.}}</span>
+                            <div>
+                                <i class="fas fa-edit"></i>
+                                <i class="fas fa-check"></i>
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        </div>
+                        {% endfor %}
+                   </div>
                     <div id="completed-list" class="col-md-6 mb-3">
                         <h4>Completed Tasks</h4>
+                        {% if completed_tasks %}
+                        <button class="btn btn-danger mb-3" id="clear-completed">Clear Completed Tasks</button>
+                        {% endif %}
                         <!-- Completed items will be appended here -->
+                        {% for completed_task in completed_tasks %}
+                        <div class="todo-item">
+                            <span>{{completed_task}}</span>
+                            <span class="text-muted">${dateTime}</span>
+                            <div>
+                                <i class="fas fa-edit"></i>
+                                <i class="fas fa-undo"></i>
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
-                <button class="btn btn-danger mt-3" id="clear-completed">Clear Completed Tasks</button>
             </div>
         </div>
     </div>
 
-    <script>
+    {% comment %} <script>
         document.getElementById('todo-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const input = this.querySelector('input');
@@ -145,6 +170,6 @@
                 completedList.removeChild(completedList.lastChild);
             }
         });
-    </script>
+    </script> {% endcomment %}
 </body>
 </html>
