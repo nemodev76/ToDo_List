@@ -75,7 +75,7 @@
                         <form id="todo-form" action="{% url 'add_task' %}" method="POST">
                             {% csrf_token %}
                             <div class="input-group mb-3">
-                                <input type="text" name="task" class="form-control" placeholder="Add a new task" aria-label="New task" aria-describedby="button-addon2">
+                                <input type="text" name="task_title" class="form-control" placeholder="Add a new task" aria-label="New task" aria-describedby="button-addon2">
                                 <div class="input-group-append">
                                     <button class="btn btn-primary" type="submit" id="button-addon2">Add</button>
                                 </div>
@@ -85,11 +85,13 @@
                         {% for task in tasks %}
                         <div class="todo-item">
                             <span>{{task}}</span>
-                            <span class="text-muted">{{task.}}</span>
+                            <span class="text-muted">{{task.updated_at}}</span>
                             <div>
-                                <i class="fas fa-edit"></i>
-                                <i class="fas fa-check"></i>
-                                <i class="fas fa-trash"></i>
+                                <a href="#" class="edit-task" data-url="{% url 'edit_task' task.id %}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'check_task' task.id %}"><i class="fas fa-check"></i> </a>
+                                <a href="{% url 'delete_task' task.id %}"><i class="fas fa-trash"></i></a>
                             </div>
                         </div>
                         {% endfor %}
@@ -103,11 +105,10 @@
                         {% for completed_task in completed_tasks %}
                         <div class="todo-item">
                             <span>{{completed_task}}</span>
-                            <span class="text-muted">${dateTime}</span>
+                            <span class="text-muted">{{completed_task.updated_at}}</span>
                             <div>
-                                <i class="fas fa-edit"></i>
-                                <i class="fas fa-undo"></i>
-                                <i class="fas fa-trash"></i>
+                                <a href="{% url 'uncheck_task' completed_task.id %}"><i class="fas fa-undo"></i></a>
+                                <a href="{% url 'delete_task' completed_task.id %}"><i class="fas fa-trash"></i></a>
                             </div>
                         </div>
                         {% endfor %}
@@ -117,59 +118,60 @@
         </div>
     </div>
 
-    {% comment %} <script>
-        document.getElementById('todo-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const input = this.querySelector('input');
-            const task = input.value.trim();
-            if (task) {
-                const todoList = document.getElementById('todo-list');
-                const todoItem = document.createElement('div');
-                todoItem.className = 'todo-item';
-                const dateTime = new Date().toLocaleString();
-                todoItem.innerHTML = `
-                    <span>${task}</span>
-                    <span class="text-muted">${dateTime}</span>
-                    <div>
-                        <i class="fas fa-edit"></i>
-                        <i class="fas fa-check"></i>
-                        <i class="fas fa-trash"></i>
-                    </div>
-                `;
-                todoList.appendChild(todoItem);
-                input.value = '';
-                todoItem.querySelector('.fa-trash').addEventListener('click', function() {
-                    todoItem.parentNode.removeChild(todoItem);
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const taskInput = document.querySelector('input[name="task_title"]');
+            const addButton = document.getElementById('button-addon2');
+            const todoForm = document.getElementById('todo-form');
+    
+            // Focus input on page load
+            taskInput.focus();
+    
+            // Focus input when add button is clicked
+            addButton.addEventListener('click', function() {
+                taskInput.focus();
+            });
+    
+            // Focus input when Enter key is pressed inside the form
+            todoForm.addEventListener('submit', function(event) {
+                setTimeout(() => {
+                    taskInput.focus();
+                }, 10);  // Delay to ensure form submission happens first
+            });
+    
+            document.querySelectorAll('.edit-task').forEach(function(editLink) {
+                editLink.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    let editUrl = this.getAttribute('data-url');
+                    let currentTask = this.closest('.todo-item').querySelector('span').textContent;
+    
+                    let newTask = prompt('Edit your task:', currentTask);
+                    if (newTask && newTask.trim() !== '') {
+                        let form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = editUrl;
+    
+                        let csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = 'csrfmiddlewaretoken';
+                        csrfInput.value = '{{ csrf_token }}';
+    
+                        let taskInput = document.createElement('input');
+                        taskInput.type = 'hidden';
+                        taskInput.name = 'new_task_title';
+                        taskInput.value = newTask;
+    
+                        form.appendChild(csrfInput);
+                        form.appendChild(taskInput);
+                        document.body.appendChild(form);
+                        form.submit();
+                    } else {
+                        // Focus back to the add task input if prompt is canceled or empty
+                        taskInput.focus();
+                    } 
                 });
-                todoItem.querySelector('.fa-check').addEventListener('click', function() {
-                    todoItem.classList.add('completed');
-                    todoItem.querySelector('.fa-check').style.display = 'none';
-                    const undoIcon = document.createElement('i');
-                    undoIcon.className = 'fas fa-undo';
-                    todoItem.querySelector('div').appendChild(undoIcon);
-                    document.getElementById('completed-list').appendChild(todoItem);
-                    undoIcon.addEventListener('click', function() {
-                        todoItem.classList.remove('completed');
-                        todoItem.querySelector('.fa-check').style.display = 'inline';
-                        undoIcon.parentNode.removeChild(undoIcon);
-                        document.getElementById('todo-list').appendChild(todoItem);
-                    });
-                });
-                todoItem.querySelector('.fa-edit').addEventListener('click', function() {
-                    const newTask = prompt('Edit your task:', task);
-                    if (newTask) {
-                        todoItem.querySelector('span').textContent = newTask;
-                    }
-                });
-            }
+            });
         });
-
-        document.getElementById('clear-completed').addEventListener('click', function() {
-            const completedList = document.getElementById('completed-list');
-            while (completedList.children.length > 1) {
-                completedList.removeChild(completedList.lastChild);
-            }
-        });
-    </script> {% endcomment %}
+    </script>        
 </body>
 </html>
