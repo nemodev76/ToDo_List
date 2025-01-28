@@ -90,8 +90,18 @@
                                 <a href="#" class="edit-task" data-url="{% url 'edit_task' task.id %}">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{% url 'check_task' task.id %}"><i class="fas fa-check"></i> </a>
-                                <a href="{% url 'delete_task' task.id %}"><i class="fas fa-trash"></i></a>
+                                <form action="{% url 'check_task' task.id %}" method="POST" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                                        <i class="fas fa-check text-success"></i>
+                                    </button>
+                                </form>
+                                <form action="{% url 'delete_task' task.id %}" method="POST" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                                        <i class="fas fa-trash text-danger"></i>
+                                    </button>
+                                </form>                                
                             </div>
                         </div>
                         {% endfor %}
@@ -99,7 +109,11 @@
                     <div id="completed-list" class="col-md-6 mb-3">
                         <h4>Completed Tasks</h4>
                         {% if completed_tasks %}
-                        <button class="btn btn-danger mb-3" id="clear-completed">Clear Completed Tasks</button>
+                        <form id="clear-completed-form" action="{% url 'clear_completed_tasks' %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger mb-3">Clear Completed Tasks</button>
+                        </form>
+                        
                         {% endif %}
                         <!-- Completed items will be appended here -->
                         {% for completed_task in completed_tasks %}
@@ -107,8 +121,18 @@
                             <span>{{completed_task}}</span>
                             <span class="text-muted">{{completed_task.updated_at}}</span>
                             <div>
-                                <a href="{% url 'uncheck_task' completed_task.id %}"><i class="fas fa-undo"></i></a>
-                                <a href="{% url 'delete_task' completed_task.id %}"><i class="fas fa-trash"></i></a>
+                                <form action="{% url 'uncheck_task' completed_task.id %}" method="POST" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                                        <i class="fas fa-undo text-info"></i>
+                                    </button>
+                                </form>
+                                <form action="{% url 'delete_task' completed_task.id %}" method="POST" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                                        <i class="fas fa-trash text-danger"></i>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                         {% endfor %}
@@ -171,7 +195,15 @@
                     } 
                 });
             });
+
+            const clearCompletedForm = document.getElementById('clear-completed-form');
+            clearCompletedForm.addEventListener('click', function(event) {
+                const confirmation = confirm("Are you sure you want to clear all completed tasks?");
+                if (!confirmation) {
+                    event.preventDefault(); // Prevent form action
+                }
+            });            
         });
-    </script>        
+    </script>
 </body>
 </html>
