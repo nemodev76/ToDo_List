@@ -7,60 +7,7 @@
     <title>To-Do List App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
-        }
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .card-header {
-            background-color: #007bff;
-            color: white;
-            border-radius: 10px 10px 0 0;
-        }
-        .card-body {
-            padding: 30px;
-        }
-        .form-control {
-            border-radius: 20px;
-        }
-        .btn-primary {
-            border-radius: 20px;
-        }
-        .todo-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-        .todo-item:last-child {
-            border-bottom: none;
-        }
-        .todo-item .fa-trash, .todo-item .fa-check, .todo-item .fa-edit, .todo-item .fa-undo {
-            cursor: pointer;
-        }
-        .todo-item .fa-trash {
-            color: #dc3545;
-        }
-        .todo-item .fa-check {
-            color: #28a745;
-        }
-        .todo-item .fa-edit {
-            color: #ffc107;
-        }
-        .todo-item .fa-undo {
-            color: #17a2b8;
-        }
-        .completed {
-            text-decoration: line-through;
-            color: #6c757d;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <div class="container mt-5">
@@ -108,12 +55,20 @@
                    </div>
                     <div id="completed-list" class="col-md-6 mb-3">
                         <h4>Completed Tasks</h4>
+                        {% if messages %}
+                            <div class="messages">
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                         {% if completed_tasks %}
                         <form id="clear-completed-form" action="{% url 'clear_completed_tasks' %}" method="POST">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger mb-3">Clear Completed Tasks</button>
                         </form>
-                        
                         {% endif %}
                         <!-- Completed items will be appended here -->
                         {% for completed_task in completed_tasks %}
@@ -141,69 +96,7 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const taskInput = document.querySelector('input[name="task_title"]');
-            const addButton = document.getElementById('button-addon2');
-            const todoForm = document.getElementById('todo-form');
     
-            // Focus input on page load
-            taskInput.focus();
-    
-            // Focus input when add button is clicked
-            addButton.addEventListener('click', function() {
-                taskInput.focus();
-            });
-    
-            // Focus input when Enter key is pressed inside the form
-            todoForm.addEventListener('submit', function(event) {
-                setTimeout(() => {
-                    taskInput.focus();
-                }, 10);  // Delay to ensure form submission happens first
-            });
-    
-            document.querySelectorAll('.edit-task').forEach(function(editLink) {
-                editLink.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    let editUrl = this.getAttribute('data-url');
-                    let currentTask = this.closest('.todo-item').querySelector('span').textContent;
-    
-                    let newTask = prompt('Edit your task:', currentTask);
-                    if (newTask && newTask.trim() !== '') {
-                        let form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = editUrl;
-    
-                        let csrfInput = document.createElement('input');
-                        csrfInput.type = 'hidden';
-                        csrfInput.name = 'csrfmiddlewaretoken';
-                        csrfInput.value = '{{ csrf_token }}';
-    
-                        let taskInput = document.createElement('input');
-                        taskInput.type = 'hidden';
-                        taskInput.name = 'new_task_title';
-                        taskInput.value = newTask;
-    
-                        form.appendChild(csrfInput);
-                        form.appendChild(taskInput);
-                        document.body.appendChild(form);
-                        form.submit();
-                    } else {
-                        // Focus back to the add task input if prompt is canceled or empty
-                        taskInput.focus();
-                    } 
-                });
-            });
-
-            const clearCompletedForm = document.getElementById('clear-completed-form');
-            clearCompletedForm.addEventListener('click', function(event) {
-                const confirmation = confirm("Are you sure you want to clear all completed tasks?");
-                if (!confirmation) {
-                    event.preventDefault(); // Prevent form action
-                }
-            });            
-        });
-    </script>
+    <script src="{% static 'js/app.js' %}"></script>
 </body>
 </html>
