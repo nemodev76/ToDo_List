@@ -31,6 +31,9 @@ function focusTaskInput() {
 
 
 function setupEditTaskLinks() {
+    // Get CSRF token from meta tag
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
     document.querySelectorAll('.edit-task').forEach(function(editLink) {
         editLink.addEventListener('click', function(event) {
             event.preventDefault();
@@ -46,7 +49,7 @@ function setupEditTaskLinks() {
                 let csrfInput = document.createElement('input');
                 csrfInput.type = 'hidden';
                 csrfInput.name = 'csrfmiddlewaretoken';
-                csrfInput.value = '{{ csrf_token }}';
+                csrfInput.value = csrfToken; // Use the retrieved token
 
                 let taskInput = document.createElement('input');
                 taskInput.type = 'hidden';
@@ -65,19 +68,20 @@ function setupEditTaskLinks() {
     });
 }
 
-
 function confirmClearCompleted() {
     const clearCompletedForm = document.getElementById('clear-completed-form');
-    clearCompletedForm.addEventListener('click', function(event) {
-        const confirmation = confirm("Are you sure you want to clear all completed tasks?");
-        if (!confirmation) {
-            event.preventDefault(); // Prevent form action
-        }
-    });
+    if (clearCompletedForm) {  // ✅ Check if the element exists
+        clearCompletedForm.addEventListener('click', function(event) {
+            const confirmation = confirm("Are you sure you want to clear all completed tasks?");
+            if (!confirmation) {
+                event.preventDefault(); // Prevent form action
+            }
+        });
+    }
 }
 
 
-function autoDismissMessages(timeout = 5000) {
+function autoDismissMessages(timeout = 3000) {
     let alerts = document.querySelectorAll(".alert");
 
     alerts.forEach(function (alert) {
